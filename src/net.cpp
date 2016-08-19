@@ -1181,33 +1181,17 @@ void MapPort(bool)
 // Each pair gives a source name and a seed name.
 // The first name is used as information source for addrman.
 // The second name should resolve to a list of seed addresses.
-static const char *strDNSSeed[][2] = {
+static const char *strMainNetDNSSeed[][2] = {
     {"192.3.165.30", "192.3.165.30"},
     {"95.211.57.108", "95.211.57.108"},
+    {NULL, NULL}
 };
 
-void ThreadDNSAddressSeed(void* parg)
-{
-    // Make this thread recognisable as the DNS seeding thread
-    RenameThread("dollarcoin-dnsseed");
+static const char *strTestNetDNSSeed[][2] = {
+    {NULL, NULL}
+};
 
-    try
-    {
-        vnThreadsRunning[THREAD_DNSSEED]++;
-        ThreadDNSAddressSeed2(parg);
-        vnThreadsRunning[THREAD_DNSSEED]--;
-    }
-    catch (std::exception& e) {
-        vnThreadsRunning[THREAD_DNSSEED]--;
-        PrintException(&e, "ThreadDNSAddressSeed()");
-    } catch (...) {
-        vnThreadsRunning[THREAD_DNSSEED]--;
-        throw; // support pthread_cancel()
-    }
-    printf("ThreadDNSAddressSeed exited\n");
-}
-
-void ThreadDNSAddressSeed2(void* parg)
+void ThreadDNSAddressSeed()
 {
     const vector<CDNSSeedData> &vSeeds = Params().DNSSeeds();
     int found = 0;
